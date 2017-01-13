@@ -61,6 +61,9 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <Content Include="Document.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="KeyValue.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

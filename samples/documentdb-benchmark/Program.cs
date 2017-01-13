@@ -1,4 +1,7 @@
-﻿namespace DocumentDBBenchmark
+﻿using System.Security.Cryptography;
+using System.Text;
+
+namespace DocumentDBBenchmark
 {
     using System;
     using System.Collections.Generic;
@@ -22,6 +25,21 @@
         private static readonly string DatabaseName = ConfigurationManager.AppSettings["DatabaseName"];
         private static readonly string DataCollectionName = ConfigurationManager.AppSettings["CollectionName"];
         private static readonly int CollectionThroughput = int.Parse(ConfigurationManager.AppSettings["CollectionThroughput"]);
+        private static readonly SHA1 _sha1 = SHA1.Create();
+        private const string _orgId = "6cca4472-7a17-4226-aefa-71623327416e";
+
+        private static byte[] GetByteArray(string input)
+        {
+            return Encoding.UTF8.GetBytes(input);
+        }
+
+        public static byte[] CalculateSHA1Hash(string input)
+        {
+            var inputBytes = GetByteArray(input);
+            var hash = _sha1.ComputeHash(inputBytes);
+
+            return hash;
+        }
 
         private static readonly ConnectionPolicy ConnectionPolicy = new ConnectionPolicy 
         { 
@@ -29,6 +47,7 @@
             ConnectionProtocol = Protocol.Tcp, 
             RequestTimeout = new TimeSpan(1, 0, 0), 
             MaxConnectionLimit = 1000, 
+            EnableEndpointDiscovery = false,
             RetryOptions = new RetryOptions 
             { 
                 MaxRetryAttemptsOnThrottledRequests = 10,
@@ -183,11 +202,17 @@
             string partitionKeyProperty = collection.PartitionKey.Paths[0].Replace("/", "");
             Dictionary<string, object> newDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(sampleJson);
 
+            var rand = new Random();
             for (var i = 0; i < numberOfDocumentsToInsert; i++)
             {
                 newDictionary["id"] = Guid.NewGuid().ToString();
-                newDictionary[partitionKeyProperty] = Guid.NewGuid().ToString();
+                newDictionary[partitionKeyProperty] = _orgId; //$"doc_{Guid.NewGuid()}";
 
+                var file = $"https://www.colligoapp.com/{rand.Next()}/{rand.NextDouble()}";
+                newDictionary["file"] = file;
+                newDictionary["fileHash"] = string.Concat(CalculateSHA1Hash(file).Select(x => x.ToString("X2")));
+                newDictionary["userCount"] = rand.Next();
+                newDictionary["deviceCount"] = rand.Next();
                 try
                 {
                     ResourceResponse<Document> response = await client.CreateDocumentAsync(
