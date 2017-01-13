@@ -26,7 +26,7 @@ namespace DocumentDBBenchmark
         private static readonly string DataCollectionName = ConfigurationManager.AppSettings["CollectionName"];
         private static readonly int CollectionThroughput = int.Parse(ConfigurationManager.AppSettings["CollectionThroughput"]);
         private static readonly SHA1 _sha1 = SHA1.Create();
-        private const string _orgId = "6cca4472-7a17-4226-aefa-71623327416e";
+        private const string _orgId = "F56C7892-02D7-43DC-BFA9-0052ECCC706A";
 
         private static byte[] GetByteArray(string input)
         {
