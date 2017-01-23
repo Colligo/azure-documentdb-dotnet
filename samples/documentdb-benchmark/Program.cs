@@ -27,6 +27,7 @@ namespace DocumentDBBenchmark
         private static readonly int CollectionThroughput = int.Parse(ConfigurationManager.AppSettings["CollectionThroughput"]);
         private static readonly SHA1 _sha1 = SHA1.Create();
         private const string _orgId = "F56C7892-02D7-43DC-BFA9-0052ECCC706A";
+        private const int _maxInt = 1000;
 
         private static byte[] GetByteArray(string input)
         {
@@ -208,11 +209,11 @@ namespace DocumentDBBenchmark
                 newDictionary["id"] = Guid.NewGuid().ToString();
                 newDictionary[partitionKeyProperty] = _orgId; //$"doc_{Guid.NewGuid()}";
 
-                var file = $"https://www.colligoapp.com/{rand.Next()}/{rand.NextDouble()}";
+                var file = $"https://www.colligoapp.com/{rand.Next()}/{rand.Next()}";
                 newDictionary["file"] = file;
                 newDictionary["fileHash"] = string.Concat(CalculateSHA1Hash(file).Select(x => x.ToString("X2")));
-                newDictionary["userCount"] = rand.Next();
-                newDictionary["deviceCount"] = rand.Next();
+                newDictionary["userCount"] = rand.Next(_maxInt);
+                newDictionary["deviceCount"] = rand.Next(_maxInt);
                 try
                 {
                     ResourceResponse<Document> response = await client.CreateDocumentAsync(
